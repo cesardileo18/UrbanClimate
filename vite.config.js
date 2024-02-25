@@ -4,5 +4,5 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base:"https://github.com/cesardileo18/UrbanClimate.git"
+  base:"https://cesardileo18.github.io/UrbanClimate"
 })

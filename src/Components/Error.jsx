@@ -11,7 +11,7 @@ const Error = () => {
       <article className="error__content">
         <img
           className="error__image"
-          src="/img/error404/error.png" 
+          src="img/error404/error.png" 
           alt="Error 404"
         />
         <p className="error__back">
