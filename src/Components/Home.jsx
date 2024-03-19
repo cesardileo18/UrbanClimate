@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import "./Css/home.css"
+import Spinner from './Spinner';
 const Home = () => {
     const [city, setCity] = useState('');
     const [weatherData, setWeatherData] = useState(null);
     const [location, setLocation] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
     const [errorMessageApi, setErrorMessageApi] = useState('');
-
+    const [loading, setLoading] = useState(false)
 
     const getMeteorology = () => {
         if (city.trim() === '') {
             // Manejo de error si la ciudad está vacía
             setErrorMessage('Por favor, ingresa una ciudad.');
-            setErrorMessageApi('');
-            console.log('Por favor, ingresa una ciudad.');
             return;
         }
         // Expresión regular para validar que no haya números en la cadena
@@ -21,11 +20,10 @@ const Home = () => {
 
         if (!regex.test(city)) {
             setErrorMessage('Por favor, ingresa una ciudad sin números.');
-            setErrorMessageApi('');
-            console.log('Por favor, ingresa una ciudad sin números.');
             return;
         }
         setErrorMessage('');
+        setLoading(true)
         var requestOptions = {
             method: 'GET',
         };
@@ -38,10 +36,12 @@ const Home = () => {
                 if (result.location) {
                     localStorage.setItem('lastLocation', JSON.stringify(result.location));
                 }
+                setLoading(false)
             })
             .catch((error) => {
                 console.log('error', error)
-                setErrorMessageApi('Hubo un Error');
+                setErrorMessageApi('La ciudad que ingresó no es válida');
+                setLoading(false)
             })
     };
     const handleSubmit = (e) => {
@@ -49,6 +49,7 @@ const Home = () => {
         getMeteorology();
     };
     useEffect(() => {
+        setLoading(true)
         // Recuperar la última ciudad al cargar la página
         const lastCity = localStorage.getItem('lastCity');
         if (lastCity) {
@@ -64,6 +65,7 @@ const Home = () => {
         if (lastLocation) {
             setLocation(lastLocation);
         }
+        setLoading(false)
     }, []);
 
     useEffect(() => {
@@ -74,7 +76,7 @@ const Home = () => {
         setErrorMessage('');
     }
     return (
-        <div>
+        <div style={{ widows: "100%" }}>
             <h2>Consulta del Tiempo</h2>
             <form className="form-inline d-flex justify-content-center flex-column align-items-center" onSubmit={handleSubmit}>
                 <div className='form-group mx-sm-3 mb-2 col-md-8 col-lg-8 col-xl-8 col-12' >
@@ -102,33 +104,39 @@ const Home = () => {
                 </div>
             )}
             {errorMessageApi && (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <p className='mx-2'>{errorMessageApi}</p>
+                <div>
+                    <p className='m-3'>{errorMessageApi}</p>
                 </div>
             )}
-            {!errorMessageApi && weatherData !== null && (
-                <div className="weather-info">
-                    <h3>Clima Actual</h3>
-                    <p>Temperatura: {weatherData.temperature ? weatherData.temperature : ""}°C</p>
-                    <p>Sensación Térmica: {weatherData.temperatureApparent ? weatherData.temperatureApparent : ""}°C</p>
-                    <p>Humedad: {weatherData.humidity ? weatherData.humidity : ""}%</p>
-                    <p>Cobertura de Nubes: {weatherData.cloudCover ? weatherData.cloudCover : ""}%</p>
-
-                    <h3>Viento</h3>
-                    <p>Dirección del Viento: {weatherData.windDirection ? weatherData.windDirection : ""} grados</p>
-                    <p>Velocidad del Viento: {weatherData.windSpeed ? weatherData.windSpeed : ""} m/s</p>
-                    <p>Ráfaga Máxima: {weatherData.windGust ? weatherData.windGust : ""} m/s</p>
-
-                    <h3>Condiciones Adicionales</h3>
-                    <p>Índice UV: {weatherData.uvIndex !== undefined ? `${weatherData.uvIndex}` : 'N/A'}</p>
-                    <p>Visibilidad: {weatherData.visibility ? weatherData.visibility : ""} km</p>
-
-                    <h3>Probabilidades</h3>
-                    <p>Probabilidad de Precipitación, Lluvia:{weatherData.precipitationProbability !== undefined ? `${weatherData.precipitationProbability}` : 'N/A'}%</p>
-
-                    <h3>Ciudad</h3>
-                    <p>{location && `${location.name}`}</p>
+            {loading ? (
+                <div style={{ height: "69vh" }} className="d-flex justify-content-center align-items-center">
+                    <Spinner />
                 </div>
+            ) : (
+                !errorMessageApi && weatherData !== null && (
+                    <div className="weather-info">
+                        <h3>Clima Actual</h3>
+                        <p>Temperatura: {weatherData.temperature ? weatherData.temperature : ""}°C</p>
+                        <p>Sensación Térmica: {weatherData.temperatureApparent ? weatherData.temperatureApparent : ""}°C</p>
+                        <p>Humedad: {weatherData.humidity ? weatherData.humidity : ""}%</p>
+                        <p>Cobertura de Nubes: {weatherData.cloudCover ? weatherData.cloudCover : ""}%</p>
+
+                        <h3>Viento</h3>
+                        <p>Dirección del Viento: {weatherData.windDirection ? weatherData.windDirection : ""} grados</p>
+                        <p>Velocidad del Viento: {weatherData.windSpeed ? weatherData.windSpeed : ""} m/s</p>
+                        <p>Ráfaga Máxima: {weatherData.windGust ? weatherData.windGust : ""} m/s</p>
+
+                        <h3>Condiciones Adicionales</h3>
+                        <p>Índice UV: {weatherData.uvIndex !== undefined ? `${weatherData.uvIndex}` : 'N/A'}</p>
+                        <p>Visibilidad: {weatherData.visibility ? weatherData.visibility : ""} km</p>
+
+                        <h3>Probabilidades</h3>
+                        <p>Probabilidad de Precipitación, Lluvia:{weatherData.precipitationProbability !== undefined ? `${weatherData.precipitationProbability}` : 'N/A'}%</p>
+
+                        <h3>Ciudad</h3>
+                        <p>{location && `${location.name}`}</p>
+                    </div>
+                )
             )}
         </div>
     );
